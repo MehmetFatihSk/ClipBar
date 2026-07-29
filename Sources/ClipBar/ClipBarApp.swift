@@ -4,10 +4,10 @@ import SwiftUI
 struct ClipBarApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var manager = ClipboardManager()
-    @AppStorage("appearanceMode") private var appearanceRaw = AppearanceMode.system.rawValue
+    @AppStorage("appearanceMode") private var appearanceRaw = AppearanceMode.light.rawValue
 
-    private var colorScheme: ColorScheme? {
-        (AppearanceMode(rawValue: appearanceRaw) ?? .system).colorScheme
+    private var colorScheme: ColorScheme {
+        (AppearanceMode(rawValue: appearanceRaw) ?? .light).colorScheme
     }
 
     var body: some Scene {

@@ -2,10 +2,13 @@ import SwiftUI
 
 struct MenuBarView: View {
     @EnvironmentObject private var manager: ClipboardManager
-    @AppStorage("appearanceMode") private var appearanceRaw = AppearanceMode.system.rawValue
+    @StateObject private var hoverController = HoverPreviewController()
+    @AppStorage("appearanceMode") private var appearanceRaw = AppearanceMode.light.rawValue
+
+    private let panelSize = CGSize(width: 340, height: 440)
 
     private var appearance: AppearanceMode {
-        AppearanceMode(rawValue: appearanceRaw) ?? .system
+        AppearanceMode(rawValue: appearanceRaw) ?? .light
     }
 
     var body: some View {
@@ -29,7 +32,23 @@ struct MenuBarView: View {
             Divider()
             footer
         }
-        .frame(width: 340, height: 440)
+        .frame(width: panelSize.width, height: panelSize.height)
+        .environmentObject(hoverController)
+        .overlayPreferenceValue(HoverAnchorKey.self) { anchors in
+            GeometryReader { proxy in
+                if let item = hoverController.hoveredItem, let anchor = anchors[item.id] {
+                    let rect = proxy[anchor]
+                    HoverPreviewOverlay(item: item)
+                        .position(x: panelSize.width / 2, y: clampedY(for: rect.midY))
+                }
+            }
+        }
+        .clipped()
+    }
+
+    private func clampedY(for anchorMidY: CGFloat) -> CGFloat {
+        let margin: CGFloat = 110
+        return min(max(anchorMidY, margin), panelSize.height - margin)
     }
 
     private var header: some View {
@@ -41,7 +60,9 @@ struct MenuBarView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
             Button {
-                appearanceRaw = appearance.next.rawValue
+                let next = appearance.next
+                appearanceRaw = next.rawValue
+                AppearanceMode.apply(rawValue: next.rawValue)
             } label: {
                 Image(systemName: appearance.symbolName)
             }
