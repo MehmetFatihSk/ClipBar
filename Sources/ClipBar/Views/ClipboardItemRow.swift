@@ -22,6 +22,11 @@ struct ClipboardItemRow: View {
         .contentShape(Rectangle())
         .onTapGesture { handlePrimaryTap() }
         .contextMenu {
+            Button {
+                manager.togglePin(item)
+            } label: {
+                Label(item.isPinned ? "Sabitten Çıkar" : "Sabitle", systemImage: item.isPinned ? "pin.slash" : "pin")
+            }
             Button("Sil", role: .destructive) { manager.remove(item) }
         }
     }

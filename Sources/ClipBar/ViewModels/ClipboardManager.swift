@@ -4,7 +4,10 @@ import SwiftUI
 
 @MainActor
 final class ClipboardManager: ObservableObject {
-    static let maxItems = 25
+    static let defaultMaxItems = 25
+    static let maxItemsRange = 1...100
+    private static let maxItemsDefaultsKey = "maxItems"
+
     /// Polling interval for NSPasteboard.changeCount. macOS has no push notification for
     /// clipboard changes, so this is the standard approach — the check itself is a cheap
     /// integer comparison and only does real work when the count actually changes.
@@ -12,12 +15,31 @@ final class ClipboardManager: ObservableObject {
 
     @Published private(set) var items: [ClipboardItem] = []
 
+    /// User-configurable history size (Settings window). Always starts at `defaultMaxItems`
+    /// for a fresh install; persisted after that.
+    @Published var maxItems: Int {
+        didSet {
+            UserDefaults.standard.set(maxItems, forKey: Self.maxItemsDefaultsKey)
+            trimToMaxItems()
+            store.saveItems(items)
+        }
+    }
+
+    /// Items for display: pinned items first (in their own recency order), then the rest —
+    /// pinning never reorders the underlying chronological `items` storage.
+    var displayItems: [ClipboardItem] {
+        items.filter(\.isPinned) + items.filter { !$0.isPinned }
+    }
+
     private let store = PersistenceStore()
     private var timer: Timer?
     private var lastChangeCount: Int
     private var imageCache: [UUID: NSImage] = [:]
 
     init() {
+        let saved = UserDefaults.standard.object(forKey: Self.maxItemsDefaultsKey) as? Int
+        maxItems = saved.map { min(max($0, Self.maxItemsRange.lowerBound), Self.maxItemsRange.upperBound) } ?? Self.defaultMaxItems
+
         lastChangeCount = NSPasteboard.general.changeCount
         items = store.loadItems()
         preloadImageCache()
@@ -99,17 +121,32 @@ final class ClipboardManager: ObservableObject {
 
     private func insert(_ item: ClipboardItem) {
         items.insert(item, at: 0)
-        if items.count > Self.maxItems {
-            let overflow = items.suffix(from: Self.maxItems)
-            for old in overflow {
+        trimToMaxItems()
+        store.saveItems(items)
+    }
+
+    /// Evicts the oldest *unpinned* items until the unpinned count fits within the
+    /// configured limit — pinned items are never evicted, even if that means the total
+    /// count temporarily exceeds `maxItems`.
+    private func trimToMaxItems() {
+        let pinnedCount = items.filter(\.isPinned).count
+        let allowedUnpinned = max(0, maxItems - pinnedCount)
+        var unpinnedToRemove = (items.count - pinnedCount) - allowedUnpinned
+        guard unpinnedToRemove > 0 else { return }
+
+        var index = items.count - 1
+        while unpinnedToRemove > 0 && index >= 0 {
+            if !items[index].isPinned {
+                let old = items[index]
                 if old.type == .image, let fileName = old.imageFileName {
                     store.deleteImage(fileName: fileName)
                 }
                 imageCache.removeValue(forKey: old.id)
+                items.remove(at: index)
+                unpinnedToRemove -= 1
             }
-            items.removeLast(items.count - Self.maxItems)
+            index -= 1
         }
-        store.saveItems(items)
     }
 
     // MARK: - User actions
@@ -135,6 +172,12 @@ final class ClipboardManager: ObservableObject {
         guard let fileName = item.imageFileName, let image = store.loadImage(fileName: fileName) else { return nil }
         imageCache[item.id] = image
         return image
+    }
+
+    func togglePin(_ item: ClipboardItem) {
+        guard let index = items.firstIndex(where: { $0.id == item.id }) else { return }
+        items[index].isPinned.toggle()
+        store.saveItems(items)
     }
 
     func remove(_ item: ClipboardItem) {

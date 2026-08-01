@@ -13,6 +13,16 @@ struct ClipboardThumbnail: View {
 
     var body: some View {
         thumbnail
+            .overlay(alignment: .topTrailing) {
+                if item.isPinned {
+                    Image(systemName: "pin.fill")
+                        .font(.system(size: 8, weight: .bold))
+                        .foregroundStyle(.white)
+                        .padding(3)
+                        .background(Circle().fill(Color.orange))
+                        .offset(x: 5, y: -5)
+                }
+            }
             .contentShape(Rectangle())
             .anchorPreference(key: HoverAnchorKey.self, value: .bounds) { [item.id: $0] }
             .onHover(perform: handleHover)

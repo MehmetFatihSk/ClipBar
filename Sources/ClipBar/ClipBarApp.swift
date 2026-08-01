@@ -25,5 +25,12 @@ struct ClipBarApp: App {
                 .environmentObject(manager)
                 .preferredColorScheme(colorScheme)
         }
+
+        WindowGroup("Ayarlar", id: "settings") {
+            SettingsView()
+                .environmentObject(manager)
+                .preferredColorScheme(colorScheme)
+        }
+        .windowResizability(.contentSize)
     }
 }

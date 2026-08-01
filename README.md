@@ -8,19 +8,20 @@
 
 ## Ne işe yarar
 
-Panoya kopyaladığın son 25 öğeyi menü bar'daki simgeden açılan popover üzerinden listeler. İçerik türüne göre otomatik olarak ayırt eder:
+Panoya kopyaladığın son öğeleri (varsayılan 25, Ayarlar'dan 1-100 arasında değiştirilebilir) menü bar'daki simgeden açılan popover üzerinden listeler. İçerik türüne göre otomatik olarak ayırt eder:
 
 - **Metin** — düz metin olarak listelenir
 - **Link** — tıklayınca tarayıcıda açılır
 - **Renk kodu** (`#RRGGBB`) — yanında renk önizleme kutucuğu ile gösterilir; üzerine gelince otomatik büyür
 - **Görsel** — küçük önizleme; üzerine gelince otomatik büyür, tıklayınca ayrı bir pencerede tam boyut açılır
 
-Her öğenin yanındaki ikonla tek tıkla tekrar panoya kopyalanabilir. Geçmiş, uygulama kapatılıp açılsa bile korunur (diskte saklanır).
+Her öğenin yanındaki ikonla tek tıkla tekrar panoya kopyalanabilir. Bir öğeye sağ tıklayıp **Sabitle**'ye basarsan raptiye rozetiyle işaretlenir ve liste ne kadar dolarsa dolsun her zaman en üstte kalır. Geçmiş, uygulama kapatılıp açılsa bile korunur (diskte saklanır).
 
 ## Özellikler
 
 - Menü bar'da native popover arayüz (macOS Human Interface Guidelines'a uygun)
-- Son 25 öğe, kapasite aşılınca en eski öğe otomatik düşer
+- Gösterilecek öğe sayısı Ayarlar penceresinden yapılandırılabilir (varsayılan 25, en fazla 100); kapasite aşılınca en eski öğe otomatik düşer
+- Sağ tık menüsünden öğe sabitleme — sabitlenenler raptiye rozetiyle işaretlenir, her zaman listenin en üstünde kalır ve kapasite dolduğunda silinmez
 - Akıllı içerik algılama: metin / link / renk kodu / görsel
 - Renk ve görsel küçük resimlerinin üzerine gelince otomatik büyüyen önizleme (tıklamaya gerek yok)
 - Görsellere tıklayınca ayrı bir pencerede tam boyut önizleme

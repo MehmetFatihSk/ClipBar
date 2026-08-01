@@ -4,6 +4,7 @@ struct MenuBarView: View {
     @EnvironmentObject private var manager: ClipboardManager
     @StateObject private var hoverController = HoverPreviewController()
     @AppStorage("appearanceMode") private var appearanceRaw = AppearanceMode.light.rawValue
+    @Environment(\.openWindow) private var openWindow
 
     private let panelSize = CGSize(width: 340, height: 440)
 
@@ -21,7 +22,7 @@ struct MenuBarView: View {
             } else {
                 ScrollView {
                     LazyVStack(spacing: 2) {
-                        ForEach(manager.items) { item in
+                        ForEach(manager.displayItems) { item in
                             ClipboardItemRow(item: item)
                         }
                     }
@@ -56,7 +57,7 @@ struct MenuBarView: View {
             Text("ClipBar")
                 .font(.headline)
             Spacer()
-            Text("\(manager.items.count)/\(ClipboardManager.maxItems)")
+            Text("\(manager.items.count)/\(manager.maxItems)")
                 .font(.caption)
                 .foregroundStyle(.secondary)
             Button {
@@ -97,6 +98,15 @@ struct MenuBarView: View {
 
     private var footer: some View {
         HStack {
+            Button {
+                openSettings()
+            } label: {
+                Image(systemName: "gearshape")
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(.secondary)
+            .help("Ayarlar")
+
             Spacer()
             Button("Çıkış") {
                 NSApplication.shared.terminate(nil)
@@ -107,5 +117,14 @@ struct MenuBarView: View {
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
+    }
+
+    private func openSettings() {
+        if let existing = NSApp.windows.first(where: { $0.title == "Ayarlar" }) {
+            existing.makeKeyAndOrderFront(nil)
+        } else {
+            openWindow(id: "settings")
+        }
+        NSApp.activate(ignoringOtherApps: true)
     }
 }
