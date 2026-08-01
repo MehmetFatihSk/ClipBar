@@ -1,25 +1,21 @@
 import SwiftUI
 
+/// Settings screen content — shown in-place inside the same menu bar popover
+/// (not a separate window), navigated to via the gear icon in the footer.
 struct SettingsView: View {
     @EnvironmentObject private var manager: ClipboardManager
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            Text("Ayarlar")
-                .font(.title2.bold())
-
-            VStack(alignment: .leading, spacing: 8) {
-                Stepper(value: $manager.maxItems, in: ClipboardManager.maxItemsRange) {
-                    Text("Gösterilecek kopya sayısı: \(manager.maxItems)")
-                }
-                Text("Varsayılan: \(ClipboardManager.defaultMaxItems) · En fazla: \(ClipboardManager.maxItemsRange.upperBound)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+        VStack(alignment: .leading, spacing: 6) {
+            Stepper(value: $manager.maxItems, in: ClipboardManager.maxItemsRange) {
+                Text("Gösterilecek kopya sayısı: \(manager.maxItems)")
+                    .font(.callout)
             }
-
-            Spacer()
+            Text("Varsayılan: \(ClipboardManager.defaultMaxItems) · En fazla: \(ClipboardManager.maxItemsRange.upperBound)")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
         }
-        .padding(24)
-        .frame(width: 340, height: 440, alignment: .top)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
     }
 }
